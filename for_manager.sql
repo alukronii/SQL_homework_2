@@ -17,10 +17,10 @@ FROM orders;
 -- Смотри таблицу order_details. Вывод: id заказа, итоговый чек (сумма стоимостей всех продуктов со скидкой)
 SELECT 
 	order_id AS "Номер заказа",
-	ROUND(CAST(SUM(quantity * (unit_price - unit_price * discount)) AS NUMERIC, 3) AS "Итоговая сумма со скидкой"
+	ROUND(CAST(SUM(quantity * (unit_price - unit_price * discount)) AS NUMERIC), 3) AS "Итоговая сумма со скидкой"
 FROM order_details
 GROUP BY order_id
-ORDER BY order_id ASC;
+ORDER BY "Номер заказа" ASC;
 
 -- x 3.3. Показать сколько сотрудников работает в каждом городе. Смотри таблицу employee.
 -- Вывод: наименование города и количество сотрудников
