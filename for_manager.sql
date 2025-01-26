@@ -9,37 +9,21 @@
 -- employees - сотрудники
 
 -- x 3.1. Посчитать количество заказов за все время. Смотри таблицу orders. Вывод: количество заказов.
-
-SELECT *
-FROM orders;
-
 SELECT
 	COUNT(*) AS "Количество всех заказов"
 FROM orders;
 
 -- x 3.2. Посчитать сумму денег по всем заказам за все время (учитывая скидки).
 -- Смотри таблицу order_details. Вывод: id заказа, итоговый чек (сумма стоимостей всех продуктов со скидкой)
-
-SELECT *
-FROM order_details;
-
-SELECT
-	COUNT(DISTINCT order_id) AS "Количество неповторяющихся заказов"
-FROM order_details;
-
 SELECT 
 	order_id AS "Номер заказа",
-	SUM(quantity*(unit_price-unit_price*discount)) AS "Итоговая сумма со скидкой"
+	ROUND(CAST(SUM(quantity * (unit_price - unit_price * discount)) AS NUMERIC, 3) AS "Итоговая сумма со скидкой"
 FROM order_details
 GROUP BY order_id
 ORDER BY order_id ASC;
 
--- 3.3. Показать сколько сотрудников работает в каждом городе. Смотри таблицу employee.
+-- x 3.3. Показать сколько сотрудников работает в каждом городе. Смотри таблицу employee.
 -- Вывод: наименование города и количество сотрудников
-
-SELECT *
-FROM employees;
-
 SELECT
 	city AS "Город",
 	COUNT(city) AS "Количество сотрудников"
@@ -47,33 +31,44 @@ FROM employees
 GROUP BY city
 ORDER BY "Количество сотрудников" DESC;
 
--- 3.4. Показать фио сотрудника (одна колонка) и сумму всех его заказов 
-
-SELECT *
-FROM employees;
-
-SELECT *
-FROM orders;
-
+-- x 3.4. Показать фио сотрудника (одна колонка) и сумму всех его заказов 
 SELECT
 	e.title_of_courtesy || ' ' ||
 	e.last_name || ' ' ||
 	e.first_name AS "Полное имя сотрудника",
-	sum_order AS "Количество принятых заказов"
-FROM
-(
+	ROUND(CAST(SUM(sum_price) AS NUMERIC), 3) AS "Cумма всех заказов сотрудника"
+FROM (
 	SELECT
-		COUNT(order_id) AS sum_order,
-		employee_id
-	FROM orders
-	GROUP BY employee_id
+		o.order_id,
+		employee_id,
+		sum_price
+	FROM (
+		SELECT 
+			order_id,
+			SUM(quantity * (unit_price - unit_price * discount)) AS sum_price
+		FROM order_details
+		GROUP BY order_id
+	) d INNER JOIN orders o ON o.order_id = d.order_id
 ) o INNER JOIN employees e ON e.employee_id = o.employee_id
-ORDER BY sum_order DESC;
-	
+GROUP BY e.employee_id
+ORDER BY "Cумма всех заказов сотрудника" DESC;
 
 -- 3.5. Показать перечень товаров от самых продаваемых до самых непродаваемых (в штуках).
 -- - Вывести наименование продукта и количество проданных штук.
+SELECT
+	product_id,
+	SUM(quantity) AS quantity
+FROM order_details
+GROUP BY product_id;
 
-SELECT *
-FROM products;
-
+SELECT
+	product_name AS "Наименование товара",
+	o.quantity AS "Количество проданного товара"
+FROM (
+	SELECT
+		product_id,
+		SUM(quantity) AS quantity
+	FROM order_details
+	GROUP BY product_id
+) o INNER JOIN products p ON p.product_id = o.product_id
+ORDER BY "Количество проданного товара" DESC;
