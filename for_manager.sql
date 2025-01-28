@@ -56,12 +56,6 @@ ORDER BY "Cумма всех заказов сотрудника" DESC;
 -- 3.5. Показать перечень товаров от самых продаваемых до самых непродаваемых (в штуках).
 -- - Вывести наименование продукта и количество проданных штук.
 SELECT
-	product_id,
-	SUM(quantity) AS quantity
-FROM order_details
-GROUP BY product_id;
-
-SELECT
 	product_name AS "Наименование товара",
 	o.quantity AS "Количество проданного товара"
 FROM (
